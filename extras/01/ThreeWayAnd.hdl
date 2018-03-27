@@ -1,0 +1,10 @@
+// Custom Chip made for Nand2Tetris Chapter 1 exercises
+
+CHIP ThreeWayAnd {
+   IN a, b, c;
+   OUT out;
+   
+   PARTS:
+   And(a=a, b=b, out=AandB);
+   And(a=AandB, b=c, out=out);
+}
