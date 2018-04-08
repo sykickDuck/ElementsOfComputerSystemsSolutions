@@ -3,12 +3,15 @@ import sys
 from parser import Parser
 from parser import CommandType
 from code import *
+from SymbolTable import SymbolTable
 
 def main():
-    #try:
     
+    if (len(sys.argv) == 1):        
+        print("No file provided...")
+    else:    
         path = sys.argv[1]
-
+        
         if os.path.exists(path):
             fileName = __getFileName(path)
 
@@ -20,9 +23,6 @@ def main():
                 print("Provided file is not an asm file")
         else:
             print("No file found...")
-    
-    #except IndexError:
-    #    print("No arguments passed!")
 
 def __getFileName(path):
     return path.split("/")[-1]
