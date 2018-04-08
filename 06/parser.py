@@ -30,8 +30,7 @@ class Parser:
         return commandFound
 
     def advance(self):
-      self.currentCommand = self.__seekNextCommand()
-      print("Current command now: " + self.currentCommand)
+      self.currentCommand = self.__seekNextCommand()      
 
     #seeks the next command in the file and returns it
     def __seekNextCommand(self):
@@ -44,7 +43,8 @@ class Parser:
             commandFound = (currentline != "\n" and currentline[0:2] != "//" and currentline != "")
         
         if commandFound:
-            nextCommand = currentline.strip()
+            currentLineWithNoComments = currentline.split("//")[0]
+            nextCommand = currentLineWithNoComments.strip()
 
         return nextCommand
 
@@ -53,13 +53,19 @@ class Parser:
         
         if self.currentCommand[0] == "@":
             commandType = CommandType.A_COMMAND
+        elif self.currentCommand [0] == "(" and self.currentCommand[-1] == ")":
+            commandType = CommandType.L_COMMAND
         else:
             commandType = CommandType.C_COMMAND
 
         return commandType
 
     def symbol(self):
-        return self.currentCommand[1:]
+
+        if self.commandType() == CommandType.A_COMMAND:
+            return self.currentCommand[1:]
+        else:
+            return self.currentCommand[1:-1]
 
     def dest(self):
         
