@@ -11,3 +11,6 @@
 demo/
 .DS_Store
 13/more fun to go.txt
+.vscode/launch.json
+.vscode/settings.json
+*.pyc
