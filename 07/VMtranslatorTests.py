@@ -24,6 +24,7 @@ class VMtranslatorTests(unittest.TestCase):
             code = translator.translate()
             
         self.assertEqual(2, code, "Translator is expected to exit with error code 2.")
+    
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,8 +5,11 @@ class VMtranslator:
     '''Translates a single .vm file or directory containing .vm files in to an .asm file for the Hack Platform'''    
     
     def translate(self):
-        """Function responsible for orchestrating the translation"""
+        '''Function responsible for orchestrating the translation'''
 
+        #Following code for determining arguments and file/dir existence may need to be refactored out
+        #However, not sure yet so will wait till further in development to make decision
+        
         statusCode = None
         
         if (len(sys.argv) == 1):        
@@ -24,5 +27,6 @@ class VMtranslator:
 
 
 if __name__ == '__main__':
+    '''Entry point for the VMtranslator.py file.  Responsible for bootstrapping the translation process'''
     translator = VMtranslator()
     translator.translate()
