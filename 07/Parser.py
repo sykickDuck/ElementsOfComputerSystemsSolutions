@@ -96,7 +96,7 @@ class Parser:
         if(self.commandType() == CommandType.C_ARITHMETIC):
             arg1 = self.currentCommand.split(" ")[0]
         else:
-            self.currentCommand.split(" ")[1]
+            arg1 = self.currentCommand.split(" ")[1]
 
         return arg1
 
