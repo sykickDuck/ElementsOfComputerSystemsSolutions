@@ -14,7 +14,7 @@ class VMtranslator:
         
         statusCode = None
         
-        if (len(sys.argv) == 1):        
+        if (len(sys.argv) == 1):
             print("No file provided...")
             statusCode = 2
 
@@ -34,9 +34,11 @@ class VMtranslator:
 
                             commandType = parser.commandType()
 
-                            if(commandType == CommandType.C_PUSH):
+                            if commandType == CommandType.C_PUSH:
                                 writer.writePushPop(commandType, parser.arg1(), parser.arg2())
-                            elif(commandType == CommandType.C_ARITHMETIC):
+                            elif commandType == CommandType.C_POP:
+                                writer.writePushPop(commandType, parser.arg1(), parser.arg2())
+                            elif commandType == CommandType.C_ARITHMETIC:
                                 writer.writeArithmetic(parser.arg1())
 
 

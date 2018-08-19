@@ -3,6 +3,19 @@ from Parser import CommandType
 class CodeWriter:
     '''Responsible for writing VM commands as Hack assembly code to file'''
 
+    segmentToRamBaseAddressLocation = {
+        "local"     : "LCL",
+        "argument"  : "ARG",
+        "this"      : "THIS",
+        "that"      : "THAT"
+    }
+
+    fixedRamSegment = {
+        "pointer" : 3,
+        "temp"    : 5,
+    }
+
+
     def __init__(self, filePath):
         '''Set up writer to write assembly code to the specified file'''
         self.file = open(filePath, mode='w', encoding="utf-8")
@@ -148,15 +161,72 @@ class CodeWriter:
     def writePushPop(self, command, segment, index):
         '''Write the assembly for the provided push/pop command to the file'''
         
-        if command == CommandType.C_PUSH and segment == 'constant':
+        if command == CommandType.C_PUSH:
+            self.__writePush(segment, index)
+        elif command == CommandType.C_POP:
+            self.__writePop(segment, index)
+
+
+    def __writePush(self, segment, index):
+        '''push contents of segment[index] on to the stack'''
+        if segment == 'constant':
             self.__writeAssembly("@{0}".format(int(index)))
             self.__writeAssembly("D=A")
+            self.__writeAssembly("@SP") #rest of instruction to push reg d on to stack
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("M=D")
             self.__writeAssembly("@SP")
+            self.__writeAssembly("M=M+1")
+        elif segment in self.segmentToRamBaseAddressLocation:
+            baseAddressLocation = self.segmentToRamBaseAddressLocation[segment]
+            self.__writeAssembly("@{0}".format(int(index)))
+            self.__writeAssembly("D=A")
+            self.__writeAssembly("@{0}".format(baseAddressLocation))
+            self.__writeAssembly("A=D+M")
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("@SP") #rest of instructions to push reg d on to stack
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("M=D")
+            self.__writeAssembly("@SP")
+            self.__writeAssembly("M=M+1")
+        elif segment in self.fixedRamSegment:
+            address = (int(self.fixedRamSegment[segment])) + (int(index))
+            self.__writeAssembly("@{0}".format(int(address)))
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("@SP") #rest of instruction to push reg d on to stack
             self.__writeAssembly("A=M")
             self.__writeAssembly("M=D")
             self.__writeAssembly("@SP")
             self.__writeAssembly("M=M+1")
 
+
+    def __writePop(self, segment, index):
+        '''pop top of stack to segment[index]'''
+        if segment in self.segmentToRamBaseAddressLocation:
+            baseAddressLocation = self.segmentToRamBaseAddressLocation[segment]
+            self.__writeAssembly("@{0}".format(baseAddressLocation)) #following lines work out where popping the stack to in ram and stores in R13
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("@{0}".format(int(index)))
+            self.__writeAssembly("D=D+A")
+            self.__writeAssembly("@R13")
+            self.__writeAssembly("M=D")
+            self.__writeAssembly("@SP") #following lines pop stack into reg d
+            self.__writeAssembly("M=M-1")
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("M=0") #end of pop into reg D
+            self.__writeAssembly("@R13") #rest of commands takes contents of reg d and puts into location stored in R13
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("M=D")
+        elif segment in self.fixedRamSegment:
+            address = (int(self.fixedRamSegment[segment])) + (int(index))
+            self.__writeAssembly("@SP") #following lines pop stack into reg d
+            self.__writeAssembly("M=M-1")
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("M=0")
+            self.__writeAssembly("@{0}".format(int(address))) #following lines put contents of reg D into segment
+            self.__writeAssembly("M=D")
 
     def __writeAssembly(self, asm):
         self.file.write(asm + "\n")
