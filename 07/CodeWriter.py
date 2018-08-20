@@ -198,6 +198,14 @@ class CodeWriter:
             self.__writeAssembly("M=D")
             self.__writeAssembly("@SP")
             self.__writeAssembly("M=M+1")
+        elif segment == 'static':
+            self.__writeAssembly("@{0}.{1}".format(self.currentVmFile, index))
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("@SP") #rest of instructions to push reg d on to stack
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("M=D")
+            self.__writeAssembly("@SP")
+            self.__writeAssembly("M=M+1")
 
 
     def __writePop(self, segment, index):
@@ -227,6 +235,15 @@ class CodeWriter:
             self.__writeAssembly("M=0")
             self.__writeAssembly("@{0}".format(int(address))) #following lines put contents of reg D into segment
             self.__writeAssembly("M=D")
+        elif segment == 'static':
+            self.__writeAssembly("@SP") #following lines pop stack into reg d
+            self.__writeAssembly("M=M-1")
+            self.__writeAssembly("A=M")
+            self.__writeAssembly("D=M")
+            self.__writeAssembly("M=0")
+            self.__writeAssembly("@{0}.{1}".format(self.currentVmFile, index))
+            self.__writeAssembly("M=D")
+
 
     def __writeAssembly(self, asm):
         self.file.write(asm + "\n")
