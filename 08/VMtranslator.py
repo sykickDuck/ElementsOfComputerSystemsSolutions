@@ -56,6 +56,12 @@ class VMtranslator:
                                     writer.writePushPop(commandType, parser.arg1(), parser.arg2())
                                 elif commandType == CommandType.C_ARITHMETIC:
                                     writer.writeArithmetic(parser.arg1())
+                                elif commandType == CommandType.C_LABEL:
+                                    writer.writeLabel(parser.arg1())
+                                elif commandType == CommandType.C_GOTO:
+                                    writer.writeGoto(parser.arg1())
+                                elif commandType == CommandType.C_IF:
+                                    writer.writeIf(parser.arg1())
 
 
         return statusCode

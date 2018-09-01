@@ -35,6 +35,7 @@ class CodeWriter:
         '''Notify the code writer that new .VM file is being translated'''
         self.currentVmFile = fileName
         self.currentFileEqualityCheckCount = 0
+        self.currentFunctionName = None
 
 
     def writeArithmetic(self, command):
@@ -75,8 +76,7 @@ class CodeWriter:
             self.__writeAssembly("A=A-1")
             self.__writeAssembly("D=D+M")
             self.__writeAssembly("M=0") #Make assumption equality will be false
-            label = "{0}.EqualityJump.{1}".format(self.currentVmFile, self.currentFileEqualityCheckCount)
-            self.currentFileEqualityCheckCount +=1
+            label = self.__getInternalEqualityLabel()
             self.__writeAssembly("@{0}".format(label))
             self.__writeAssembly("D;JNE")
             self.__writeAssembly("@SP") #Following lines before label find where the result of equality check is and sets it to be true
@@ -97,8 +97,7 @@ class CodeWriter:
             self.__writeAssembly("A=A-1")
             self.__writeAssembly("D=D+M")
             self.__writeAssembly("M=0") #Make assumption equality will be false
-            label = "{0}.EqualityJump.{1}".format(self.currentVmFile, self.currentFileEqualityCheckCount)
-            self.currentFileEqualityCheckCount +=1
+            label = self.__getInternalEqualityLabel()
             self.__writeAssembly("@{0}".format(label))
             self.__writeAssembly("D;JLE")
             self.__writeAssembly("@SP") #Following lines before label find where the result of equality check is and sets it to be true
@@ -119,8 +118,7 @@ class CodeWriter:
             self.__writeAssembly("A=A-1")
             self.__writeAssembly("D=D+M")
             self.__writeAssembly("M=0") #Make assumption equality will be false
-            label = "{0}.EqualityJump.{1}".format(self.currentVmFile, self.currentFileEqualityCheckCount)
-            self.currentFileEqualityCheckCount +=1
+            label = self.__getInternalEqualityLabel()
             self.__writeAssembly("@{0}".format(label))
             self.__writeAssembly("D;JGE")
             self.__writeAssembly("@SP") #Following lines before label find where the result of equality check is and sets it to be true
@@ -244,6 +242,32 @@ class CodeWriter:
             self.__writeAssembly("@{0}.{1}".format(self.currentVmFile, index))
             self.__writeAssembly("M=D")
 
+
+    def writeLabel(self, label):
+        '''Writes assembly code for a VM label'''
+        self.__writeAssembly("({0})".format(self.__buildLabelText(label)))
+
+
+    def writeGoto(self, label):
+        '''Writes assembly for goto label'''
+        self.__writeAssembly("@{0}".format(self.__buildLabelText(label)))
+        self.__writeAssembly("0;JMP")
+
+
+    def writeIf(self, label):
+        '''Writes assembly to goto a label based on the last command on the stack'''
+        pass
+
+
+    def __getInternalEqualityLabel(self):
+        '''Generates a label for use in internal equality checks'''
+        label = "{0}.{1}$Eq.{2}".format(self.currentVmFile,self.currentFunctionName, self.currentFileEqualityCheckCount)
+        self.currentFileEqualityCheckCount +=1 
+        return label
+
+    def __buildLabelText(self, label):
+        '''To reduce '''
+        return "{0}${1}".format(self.currentFunctionName, label)
 
     def __writeAssembly(self, asm):
         self.file.write(asm + "\n")

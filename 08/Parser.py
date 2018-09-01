@@ -29,7 +29,7 @@ class Parser:
         "not"      : CommandType.C_ARITHMETIC,
         "label"    : CommandType.C_LABEL,
         "goto"     : CommandType.C_GOTO,
-        "if"       : CommandType.C_IF,
+        "if-goto"  : CommandType.C_IF,
         "function" : CommandType.C_FUNCTION,
         "return"   : CommandType.C_RETURN,
         "call"     : CommandType.C_CALL,
