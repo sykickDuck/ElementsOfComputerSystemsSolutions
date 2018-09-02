@@ -25,14 +25,8 @@ class VMtranslator:
             if not os.path.exists(path):
                 print("Provided File/Folder does not exist")
                 statusCode = 2
-            else:
-                print(path)
-                print(path.split("/")[-1])
-                print(self.__getFileName(path))
-                print(self.__getFileName(path).split('.'))
-                print(self.__getFileName(path).split('.')[0])
+            else:   
                 asmFileLocation = "{0}.asm".format(self.__getFileName(path).split('.')[0])
-                print(asmFileLocation)
 
                 with CodeWriter(asmFileLocation) as writer:
                     
