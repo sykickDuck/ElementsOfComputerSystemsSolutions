@@ -256,8 +256,14 @@ class CodeWriter:
 
     def writeIf(self, label):
         '''Writes assembly to goto a label based on the last command on the stack'''
-        pass
-
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=M-1")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("M=0")
+        self.__writeAssembly("@{0}".format(self.__buildLabelText(label)))
+        self.__writeAssembly("D;JNE")
+        
 
     def __getInternalEqualityLabel(self):
         '''Generates a label for use in internal equality checks'''
