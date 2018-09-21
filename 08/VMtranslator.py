@@ -56,6 +56,13 @@ class VMtranslator:
                                     writer.writeGoto(parser.arg1())
                                 elif commandType == CommandType.C_IF:
                                     writer.writeIf(parser.arg1())
+                                elif commandType == CommandType.C_FUNCTION:
+                                    writer.writeFunction(parser.arg1(), parser.arg2())
+                                elif commandType == CommandType.C_CALL:
+                                    writer.writeCall(parser.arg1(), parser.arg2())
+                                elif commandType == CommandType.C_RETURN:
+                                    writer.writeReturn()
+
 
 
         return statusCode

@@ -36,6 +36,7 @@ class CodeWriter:
         self.currentVmFile = fileName
         self.currentFileEqualityCheckCount = 0
         self.currentFunctionName = None
+        self.currentFunctionReturnLabelCount = 0
 
 
     def writeArithmetic(self, command):
@@ -263,16 +264,142 @@ class CodeWriter:
         self.__writeAssembly("M=0")
         self.__writeAssembly("@{0}".format(self.__buildLabelText(label)))
         self.__writeAssembly("D;JNE")
+
+
+    def writeFunction(self, functionName, numLocals):
+        '''Writes assembly to declare the start of a function'''
+        self.currentFunctionName = functionName
+        self.currentFunctionReturnLabelCount = 0
+        functionInitLoopLabel = "{0}${1}".format(functionName, "FunctionInit")
+
+        self.__writeAssembly("({0})".format(functionName)) #Function Label           
+        self.__writeAssembly("@R13") #Initialise register for loop
+        self.__writeAssembly("M=0")
+        self.__writeAssembly("({0}.Begin)".format(functionInitLoopLabel)) #Start of loop
+        self.__writeAssembly("@{0}".format(numLocals))
+        self.__writeAssembly("D=A")
+        self.__writeAssembly("@R13")
+        self.__writeAssembly("D=D-M")
+        self.__writeAssembly("@{0}.End".format(functionInitLoopLabel))
+        self.__writeAssembly("D;JLE")
+        self.__writeAssembly("@LCL")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@R13")
+        self.__writeAssembly("A=D+M")
+        self.__writeAssembly("M=0")
+        self.__writeAssembly("@R13")
+        self.__writeAssembly("M=M+1")
+        self.__writeAssembly("@{0}.Begin".format(functionInitLoopLabel))
+        self.__writeAssembly("0;JMP")
+        self.__writeAssembly("({0}.End)".format(functionInitLoopLabel))
+        self.__writeAssembly("@{0}".format(numLocals))
+        self.__writeAssembly("D=A")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=D+M")
+
+    def writeCall(self, functionName, numArgs):
+        '''Writes assembly code that effects the call command'''
+        returnLabel = "{0}$RetLbl.{1}".format(self.currentFunctionName, self.currentFunctionReturnLabelCount)
+        self.currentFunctionReturnLabelCount +=1
+        self.__writeAssembly("@{0}".format(returnLabel)) #push return label, LCL, ARG, THIS, THAT
+        self.__writeAssembly("D=A")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=M+1")
+        self.__writePushPointerOnToStack("LCL")
+        self.__writePushPointerOnToStack("ARG")
+        self.__writePushPointerOnToStack("THIS")
+        self.__writePushPointerOnToStack("THAT")
+        self.__writeAssembly("@SP") #reposition ARG to SP-numArgs-5
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@5")
+        self.__writeAssembly("D=D-A")
+        self.__writeAssembly("@{0}".format(numArgs))
+        self.__writeAssembly("D=D-A")
+        self.__writeAssembly("@ARG")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@SP") #Reposition LCL to SP
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@LCL")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@{0}".format(functionName)) #goto function code
+        self.__writeAssembly("0;JMP")
+        self.__writeAssembly("({0})".format(returnLabel))
+
+
+    def __writePushPointerOnToStack(self, pointer):
+        '''writes assembly to push the pointer specified in the label on to the stack'''
+        self.__writeAssembly("@{0}".format(pointer))
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=M+1")
+
+
+    def writeReturn(self):
+        '''Write assembly for a function return'''
+        self.__writeAssembly("@LCL") #FRAME=LCL
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@R13")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R13") #RET = FRAME-5
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@5")
+        self.__writeAssembly("A=D-A")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@R14")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@SP") #ARG = pop
+        self.__writeAssembly("A=M-1")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@ARG")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@ARG") #SP = ARG+1
+        self.__writeAssembly("D=M+1")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R13")#THAT = FRAME-1
+        self.__writeAssembly("M=M-1")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@THAT")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R13")#THIS = FRAME-2
+        self.__writeAssembly("M=M-1")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@THIS")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R13")#ARG = FRAME-3
+        self.__writeAssembly("M=M-1")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@ARG")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R13") #LCL = FRAME-4
+        self.__writeAssembly("M=M-1")
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("D=M")
+        self.__writeAssembly("@LCL")
+        self.__writeAssembly("M=D")
+        self.__writeAssembly("@R14") #goto RET
+        self.__writeAssembly("A=M")
+        self.__writeAssembly("0;JMP")
         
 
     def __getInternalEqualityLabel(self):
         '''Generates a label for use in internal equality checks'''
-        label = "{0}.{1}$Eq.{2}".format(self.currentVmFile,self.currentFunctionName, self.currentFileEqualityCheckCount)
+        label = "{0}$Eq.{1}".format(self.currentFunctionName, self.currentFileEqualityCheckCount)
         self.currentFileEqualityCheckCount +=1 
         return label
 
     def __buildLabelText(self, label):
-        '''To reduce '''
+        '''To reduce repeating code of writing labels'''
         return "{0}${1}".format(self.currentFunctionName, label)
 
     def __writeAssembly(self, asm):
