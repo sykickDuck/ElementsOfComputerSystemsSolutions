@@ -30,6 +30,7 @@ class VMtranslator:
 
                 with CodeWriter(asmFileLocation) as writer:
                     
+                    writer.writeInit()
                     paths = []
 
                     if os.path.isdir(path):

@@ -21,7 +21,8 @@ class CodeWriter:
         self.file = open(filePath, mode='w', encoding="utf-8")
         self.currentVmFile = None
         self.currentFileEqualityCheckCount = 0  #counts how many equality checks have occured during writing of the file
-
+        self.currentFunctionName = None
+        self.currentFunctionReturnLabelCount = 0
 
     def __enter__(self):
         return self
@@ -391,6 +392,13 @@ class CodeWriter:
         self.__writeAssembly("A=M")
         self.__writeAssembly("0;JMP")
         
+    def writeInit(self):
+        '''Writes Assembly for bootstrapping the program'''
+        self.__writeAssembly("@256")
+        self.__writeAssembly("D=A")
+        self.__writeAssembly("@SP")
+        self.__writeAssembly("M=D")
+        self.writeCall("Sys.init", "0")
 
     def __getInternalEqualityLabel(self):
         '''Generates a label for use in internal equality checks'''
