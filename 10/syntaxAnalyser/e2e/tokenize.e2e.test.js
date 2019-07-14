@@ -1,8 +1,4 @@
 const path = require("path");
-const exec = require("child_process").exec;
-const fs = require("fs");
-const del = require("del");
-
 const testJcc = require("./e2e-utils");
 
 test("Running tokenizer on Square dance project produces expected files", () => {
