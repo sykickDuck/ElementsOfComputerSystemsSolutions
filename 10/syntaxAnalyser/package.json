@@ -4,12 +4,16 @@
   "description": "Compiler for the Jack langugage",
   "main": "index.js",
   "scripts": {
+    "test:e2e": "echo 'Running end-to-end tests' && jest e2e/*",
+    "test:unit": "echo 'Running unit tests' && jest test/*",
+    "test:all": "echo 'Running all the tests!' && npm run test:unit && npm run test:e2e",
     "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "commander": "^2.20.0",
+    "del": "^4.1.1",
     "fs": "0.0.1-security",
     "readline": "^1.3.0"
   },

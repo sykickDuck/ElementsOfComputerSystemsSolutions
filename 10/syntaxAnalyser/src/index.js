@@ -6,6 +6,8 @@
 const program = require("commander");
 const fs = require("fs");
 const readline = require("readline");
+const path = require("path");
+
 module.exports = () => {
   program
     .version("1.0.0")
@@ -37,5 +39,24 @@ module.exports = () => {
       });
     });
 
+  program.command("tokenise <dir>").action(function(dir, options) {
+    console.log(`tokenising ${dir}`);
+    console.log(`Running in: ${process.cwd()}`);
+
+    fs.readdir(dir, (err, dirContents) => {
+      console.log(dirContents);
+      const jackFiles = dirContents
+        ? dirContents.filter(file => {
+            return path.extname(file) == ".jack";
+          })
+        : [];
+      console.log(jackFiles);
+
+      jackFiles.forEach(file => {
+        const tokenXmlFileName = path.basename(file).replace(".jack", "T.xml");
+        fs.writeFile(tokenXmlFileName, "", err => {});
+      });
+    });
+  });
   program.parse(process.argv);
 };
